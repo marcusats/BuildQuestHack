@@ -23,8 +23,14 @@ contract Items is ERC1155, Ownable {
 
     }
 
-    modifier forSale(uint256 tokenId) {
-        require(_itemDetails[tokenId], "item is not for sale");
+    modifier forSale(uint256 _tokenId) {
+        require(_itemDetails[_tokenId], "item is not for sale");
+        _;
+    }
+
+    modifier isItemOwner(uint256 _tokenId) {
+        require (msg.sender == _itemDetails[_tokenId].owner);
+        _;
     }
 
     mapping(uint => Item) private _itemDetails;
@@ -38,28 +44,49 @@ contract Items is ERC1155, Ownable {
         Item memory thisItem = Item(msg.sender, _supply, _name, _cost, true);
         _itemDetails[nextId] = thisItem;
 
-        _mint(msg.sender(), tokenID, supply);
+        _mint(msg.sender(), nextId, _supply);
 
         nextId++;
 
     }
 
-    function buyItem(uint256 tokenId, uint256 amount) public payable forSale(tokenId) {
+    function buyItem(uint256 _tokenId, uint256 _amount) public payable forSale(_tokenId) {
         // amount less then supply
         // safe transfer from
-        require(msg.sender != address(0));
 
-        require(amount <= _itemDetails[tokenId].supply);
+        require(msg.value >= _itemDetails[_tokenId].cost, "Didn't input enough ethere to purchase this item");
 
-        _safeTransferFrom(_itemDetails[tokenId].owner, msg.sender, tokenId, amount);
+        require(msg.sender != address(0), "Cannot be 0x00 address");
+
+        require(amount <= _itemDetails[_tokenId].supply, "This item is out of stock");
+
+        _safeTransferFrom(_itemDetails[_tokenId].owner, msg.sender, _tokenId, _amount);
 
     }
 
-    function sellItem(address _to, uint256 tokenId, uint256 amount) {
+    function sellItem(address _to, uint256 _tokenId, uint256 _amount) public {
         
         require(to != address(0));
 
-        _safeTransferFrom(msg.sender, _to, tokenId, amount);
+        _safeTransferFrom(msg.sender, _to, _tokenId, _amount);
+
+    }
+
+    function setSale(uint256 tokenId) public isItemOwner(_tokenId) {
+
+        _itemDetails[_tokenId].forSale = true;
+
+    }
+
+    function closeSale(uint256 _tokenId) public isItemOwner(_tokenId) {
+
+        _itemDetails[_tokenId].forSale = false;
+    }
+
+    function setPrice(uint256 _tokenId, uint256 _price) public isItemOwner(_tokenId) {
+
+        _itemDetails[_tokenId].cost = _price;
+
 
     }
 
