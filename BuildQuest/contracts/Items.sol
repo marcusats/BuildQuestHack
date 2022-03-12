@@ -40,10 +40,6 @@ contract Items is ERC1155, Ownable {
 
     }
 
-    function listItem() {
-
-    }
-
     function buyItem(uint256 tokenId, uint256 amount) {
         // amount less then supply
         // safe transfer from
