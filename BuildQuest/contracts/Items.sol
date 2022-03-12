@@ -44,6 +44,7 @@ contract Items is ERC1155, Ownable {
         // amount less then supply
         // safe transfer from
 
+        require(_itemDetails[tokenId].forSale);
         require(msg.sender != address(0));
 
         require(amount <= _itemDetails[tokenId].supply);
