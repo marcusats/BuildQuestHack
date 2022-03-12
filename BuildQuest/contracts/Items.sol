@@ -90,6 +90,12 @@ contract Items is ERC1155, Ownable {
 
     }
 
+    function changeName(uint256 _tokenId, uint256 _newName) public isItemOwner(_tokenId) {
+
+        _itemDetails[_tokenId].name = _newName;
+
+    }
+
 }
 
 //pick up shoes, the whole website changes to just shoes everywhere.
