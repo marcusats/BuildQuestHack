@@ -23,6 +23,10 @@ contract Items is ERC1155, Ownable {
 
     }
 
+    modifier forSale(uint256 tokenId) {
+        require(_itemDetails[tokenId], "item is not for sale");
+    }
+
     mapping(uint => Item) private _itemDetails;
 
     function getItemDetails(uint _tokenId) public view returns(Item memory) {
@@ -40,11 +44,9 @@ contract Items is ERC1155, Ownable {
 
     }
 
-    function buyItem(uint256 tokenId, uint256 amount) {
+    function buyItem(uint256 tokenId, uint256 amount) public payable forSale(tokenId) {
         // amount less then supply
         // safe transfer from
-
-        require(_itemDetails[tokenId].forSale);
         require(msg.sender != address(0));
 
         require(amount <= _itemDetails[tokenId].supply);
