@@ -3,8 +3,9 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/ownership/Ownable.sol";
+import "./Stores.sol";
 
-contract Items is ERC1155, Ownable {
+contract Items is ERC1155, Ownable, Stores {
     
     string baseURI;
     string public baseExtension = ".json";
@@ -23,6 +24,9 @@ contract Items is ERC1155, Ownable {
 
     }
 
+    mapping(uint => Item) private _itemDetails;
+    mapping(Item => uint256) private _itemToStore;
+
     modifier forSale(uint256 _tokenId) {
         require(_itemDetails[_tokenId], "item is not for sale");
         _;
@@ -33,16 +37,15 @@ contract Items is ERC1155, Ownable {
         _;
     }
 
-    mapping(uint => Item) private _itemDetails;
-
     function getItemDetails(uint _tokenId) public view returns(Item memory) {
         return _itemDetails[_tokenId];
     }
 
-    function mint(uint256 _supply, string memory _name, uint256 cost) {
+    function mint(uint256 _supply, string memory _name, uint256 cost, uint256 _store) {
 
         Item memory thisItem = Item(msg.sender, _supply, _name, _cost, true);
         _itemDetails[nextId] = thisItem;
+        _itemToStore[thisItem] = _store;
 
         _mint(msg.sender(), nextId, _supply);
 
@@ -86,7 +89,6 @@ contract Items is ERC1155, Ownable {
     function setPrice(uint256 _tokenId, uint256 _price) public isItemOwner(_tokenId) {
 
         _itemDetails[_tokenId].cost = _price;
-
 
     }
 
